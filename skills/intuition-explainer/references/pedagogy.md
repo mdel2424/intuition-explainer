@@ -32,10 +32,10 @@ reveal, counterexample, new idea, formal bridge, generalization, transfer. These
 may share a screen or require a detour. The count of stages has no pedagogical
 value by itself.
 
-For gradient descent, “move against the slope” is local advice. A large jump
-can land higher. The update equation becomes useful when the learner needs a
-repeatable rule connecting position, slope, and distance. Printing that equation
-on the first screen bypasses the very obstacle the site should help resolve.
+For conditional probability, an accurate test can still produce many false
+positives when the condition is rare. Let the learner vary the population and
+count the outcomes. The equation becomes useful when they need a repeatable
+rule connecting those counts, rather than appearing before the puzzle.
 
 ## Make misconceptions observable
 

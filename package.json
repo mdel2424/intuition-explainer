@@ -3,13 +3,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node skills/intuition-explainer/scripts/verify.mjs",
-    "test": "node --test skills/intuition-explainer/assets/template/tests/*.test.mjs",
+    "check": "node skills/intuition-explainer/scripts/verify.mjs && node skills/intuition-explainer/scripts/verify.mjs --site .",
+    "test": "node --test tests/*.test.mjs",
     "smoke": "node skills/intuition-explainer/scripts/smoke.mjs",
-    "verify": "npm run check && npm test && npm run smoke"
+    "verify": "npm run check && npm test"
   },
   "devDependencies": {
     "playwright": "1.58.2"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  }
 }

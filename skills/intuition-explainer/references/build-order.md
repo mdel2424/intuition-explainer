@@ -7,7 +7,7 @@ diagram. These are authoring steps, not a required number of learner screens.
 
 1. Inspect actual source material and record exact sections, figures, code, or
    dataset fields. Check uncertain technical facts against primary sources.
-2. Identify one observable learning target: what can the learner predict or
+2. Identify an observable learning target per unit: what can the learner predict or
    mentally simulate afterward?
 3. Sort prerequisites into assumed, inline, and separate mini-explainer.
 4. Identify the smallest conceptual bottleneck.
@@ -16,7 +16,8 @@ diagram. These are authoring steps, not a required number of learner screens.
 
 Write these into the concept plan using
 [concept-decomposition](concept-decomposition.md). For papers, first reconstruct
-the argument with [paper-explainers](paper-explainers.md). Do not start UI code.
+the argument with [paper-explainers](paper-explainers.md). For a course, inventory
+every supplied week with [course-explainers](course-explainers.md). Do not start UI code.
 
 ## 2. Design experiments and evidence
 
@@ -40,8 +41,8 @@ and [fidelity](fidelity.md).
 13. Implement the model without DOM, canvas, timers, or lesson prose.
 14. Test it independently: a known answer, an invariant, an edge case, the
     intended counterexample, and sensitivity to the learner's input. For
-    gradients, finite differences provide an independent check; for shortest
-    paths, use a hand-solvable graph and a disconnected node.
+    probabilities, enumerate a tiny sample space; for shortest paths, use a
+    hand-solvable graph and a disconnected node.
 15. Implement the visualization as a projection of that model. Keep object
     identity across transitions and representations; distinguish state from
     interpolation. Apply [visual-language](visual-language.md),
@@ -53,7 +54,8 @@ and [fidelity](fidelity.md).
 
 ## 4. Verify, inspect, revise
 
-19. Run syntax, independent model tests, and browser scenarios for all important
+19. Open `index.html` directly with network access disabled. Run syntax,
+    independent model tests, and browser scenarios for all important
     controls, stages, animation, input interruptions, keyboard, and reduced motion.
 20. Run the pedagogical review in [checklist](checklist.md). State the evidence
     behind each answer. Several weak answers require instructional revision.

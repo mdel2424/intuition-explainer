@@ -1,22 +1,19 @@
 #!/usr/bin/env node
 // Shared browser harness. Lesson-specific interactions live in the site's adapter.
 import { createRequire } from 'node:module';
-import { pathToFileURL, fileURLToPath } from 'node:url';
-import { dirname, resolve, sep, extname } from 'node:path';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { createServer } from 'node:http';
+import { pathToFileURL } from 'node:url';
+import { resolve } from 'node:path';
+import { mkdir, stat, writeFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 
-const skill = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const options = { site: resolve(skill, 'assets/template'), out: resolve('evidence'), adapter: null, url: null };
+const options = { site: null, out: resolve('evidence'), adapter: null };
 const args = process.argv.slice(2);
 for (let i = 0; i < args.length; i++) {
   const arg = args[i];
   if (arg === '--help') {
-    console.log(`Usage: node smoke.mjs [URL] [--site directory] [--adapter file.mjs] [--out directory]
-Default: serve the finished exemplar on loopback and run its browser scenarios.
-Another site: --site ./my-explainer (expects tests/browser-scenarios.mjs).
-Existing server: http://127.0.0.1:8000 --adapter ./tests/browser-scenarios.mjs.
+    console.log(`Usage: node smoke.mjs --site directory [--adapter file.mjs] [--out directory]
+Opens index.html directly through file:// with network access disabled. No server.
+The site must provide tests/browser-scenarios.mjs, or use --adapter file.mjs.
 Run from a directory with Playwright installed: npm install --save-dev playwright
 Install its browser if needed: npx playwright install chromium
 Writes screenshots plus report.json. Exit 1 on a failure, 2 on missing tools.
@@ -25,10 +22,12 @@ Adapt the scenario adapter to each new lesson. Open screenshots before claiming 
   } else if (['--site', '--adapter', '--out'].includes(arg)) {
     if (!args[i + 1] || args[i + 1].startsWith('--')) throw new Error(`Missing value for ${arg}`);
     options[arg.slice(2)] = resolve(args[++i]);
-  } else if (/^https?:\/\//.test(arg) && !options.url) options.url = arg;
-  else throw new Error(`Unknown argument: ${arg}`);
+  } else throw new Error(`Unknown argument: ${arg}`);
 }
-if (options.url && !options.adapter) throw new Error('An existing URL requires --adapter so the correct lesson is verified.');
+if (!options.site) throw new Error('Provide --site <directory>. Use --help.');
+const entry = resolve(options.site, 'index.html');
+if (!(await stat(entry)).isFile()) throw new Error('The site must contain index.html.');
+const url = pathToFileURL(entry).href;
 options.adapter ??= resolve(options.site, 'tests/browser-scenarios.mjs');
 
 let chromium;
@@ -45,24 +44,9 @@ try {
 const adapter = await import(pathToFileURL(options.adapter));
 if (typeof adapter.exercise !== 'function') throw new Error('Adapter must export async exercise({ page, check, shot, profile }).');
 await mkdir(options.out, { recursive: true });
-const report = { site: options.site, adapter: options.adapter, started: new Date().toISOString(), profiles: [], errors: [], screenshots: [], visualInspection: 'Required: open the captured images; this script cannot judge pedagogy or visual clarity.' };
-let server, browser;
-const types = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.json': 'application/json', '.png': 'image/png' };
+const report = { site: options.site, url, offline: true, adapter: options.adapter, started: new Date().toISOString(), profiles: [], errors: [], screenshots: [], visualInspection: 'Required: open the captured images; this script cannot judge pedagogy or visual clarity.' };
+let browser;
 try {
-  if (!options.url) {
-    server = createServer(async (request, response) => {
-      try {
-        const pathname = decodeURIComponent(new URL(request.url, 'http://localhost').pathname);
-        const file = resolve(options.site, `.${pathname.endsWith('/') ? pathname + 'index.html' : pathname}`);
-        if (!file.startsWith(options.site + sep)) { response.writeHead(403); response.end(); return; }
-        const body = await readFile(file);
-        response.writeHead(200, { 'Content-Type': `${types[extname(file)] ?? 'application/octet-stream'}; charset=utf-8`, 'Cache-Control': 'no-store' });
-        response.end(body);
-      } catch { response.writeHead(404); response.end('Not found'); }
-    });
-    await new Promise((yes, no) => { server.once('error', no); server.listen(0, '127.0.0.1', yes); });
-    options.url = `http://127.0.0.1:${server.address().port}/`;
-  }
   browser = await chromium.launch({ headless: true });
   const profiles = [
     { name: 'desktop', width: 1280, height: 900, reducedMotion: 'no-preference', full: true },
@@ -73,12 +57,24 @@ try {
     { name: 'zoom-reflow', width: 640, height: 900, reducedMotion: 'reduce', dpr: 2 }
   ];
   for (const profile of profiles) {
-    const context = await browser.newContext({ viewport: { width: profile.width, height: profile.height }, deviceScaleFactor: profile.dpr ?? 1, reducedMotion: profile.reducedMotion, hasTouch: !!profile.touch });
+    const context = await browser.newContext({ viewport: { width: profile.width, height: profile.height }, deviceScaleFactor: profile.dpr ?? 1, reducedMotion: profile.reducedMotion, hasTouch: !!profile.touch, offline: true, serviceWorkers: 'block' });
     const page = await context.newPage();
     page.setDefaultTimeout(12000);
     const run = { profile: profile.name, viewport: `${profile.width}×${profile.height}`, motion: profile.reducedMotion, assertions: [], visited: [] };
     report.profiles.push(run);
     const error = message => report.errors.push(`${profile.name}: ${message}`);
+    await context.route('**/*', async route => {
+      const target = route.request().url();
+      if (/^(?:file|data|blob):/.test(target)) await route.continue();
+      else {
+        error(`network dependency blocked: ${target}`);
+        await route.abort('internetdisconnected');
+      }
+    });
+    await context.routeWebSocket(/.*/, socket => {
+      error(`network dependency blocked: ${socket.url()}`);
+      socket.close();
+    });
     page.on('pageerror', e => error(`pageerror: ${e.message}`));
     page.on('console', m => { if (m.type() === 'error') error(`console: ${m.text()}`); });
     page.on('requestfailed', r => error(`request failed: ${r.url()}`));
@@ -90,7 +86,7 @@ try {
       report.screenshots.push(filename);
     };
     try {
-      await page.goto(options.url, { waitUntil: 'networkidle' });
+      await page.goto(url, { waitUntil: 'load' });
       run.visited = await adapter.exercise({ page, check, shot, profile });
       console.log(`PASS ${profile.name}: ${run.assertions.length} assertions; ${run.visited.length} stages`);
     } catch (e) {
@@ -102,7 +98,6 @@ try {
 } catch (error) { report.errors.push(error.stack ?? error.message); }
 finally {
   await browser?.close();
-  if (server) await new Promise(done => server.close(done));
   report.finished = new Date().toISOString();
   report.passed = report.errors.length === 0 && report.profiles.length === 6;
   await writeFile(resolve(options.out, 'report.json'), JSON.stringify(report, null, 2) + '\n');

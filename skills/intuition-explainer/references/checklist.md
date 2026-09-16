@@ -9,8 +9,8 @@ unresolved limitations. Do not mark unchecked items as passed.
 - [ ] The model runs without a renderer and passes independent numerical tests.
 - [ ] Known results, invariants, stationary/edge cases, and the intended failure
       example match expectations. Inputs measurably affect outputs.
-- [ ] The page loads without console errors, uncaught exceptions, failed requests,
-      or missing local assets.
+- [ ] Opening `index.html` through `file://` with network access disabled works,
+      including local assets and navigation, without console errors or failed requests.
 - [ ] Every stage is reached through the actual UI, including transfer and free
       exploration. No test-only navigation stands in for learner navigation.
 - [ ] Every control has an observable effect; predictions are committed before
@@ -31,13 +31,13 @@ unresolved limitations. Do not mark unchecked items as passed.
 
 `scripts/verify.mjs` checks package links and syntax; `--site` checks a generated
 site. Independent model tests belong to the generated site. `scripts/smoke.mjs`
-provides Playwright setup, serving, error collection, viewports, screenshots,
+provides Playwright setup, offline file loading, error collection, viewports, screenshots,
 and a JSON report. Domain-specific UI assertions live in the site's
 `tests/browser-scenarios.mjs`, so verification evolves with the lesson.
 
-Run from a project with Playwright installed. The default smoke run checks the
-finished exemplar. For another site, adapt its scenarios and use `--site` or an
-existing URL plus `--adapter`. The harness fails if the adapter is missing;
+Run from a project with Playwright installed. Use `--site <directory>` and
+provide `tests/browser-scenarios.mjs` or an explicit `--adapter <file.mjs>`.
+The harness blocks network requests and fails if the adapter is missing;
 it does not silently downgrade to “page loaded.” See `--help` for commands.
 
 Open the captured images. Inspect the first interaction, revealed counterexample,
@@ -69,8 +69,12 @@ test count does not compensate for a learner who only watches.
 
 When maintaining this skill, try requests across domains: PCA, chain rule,
 attention, shortest paths, probability, a queueing mechanism, and a supplied
-paper excerpt. Check that the plan chooses different representations, identifies
+paper excerpt, plus a course-wide set of lecture notes. Check that the plan chooses different representations, identifies
 prerequisites, inspects sources, and creates a real model and transfer test.
 Also test a plain landing-page request: this skill should not claim that task.
 Report whether this was a document review, a partial plan exercise, or a full
 generated-site evaluation; these provide different levels of evidence.
+
+For course summaries, also compare the source inventory with the final index,
+visit every weekly page offline, check its main interaction, and follow
+prerequisite and previous/next links. Record missing source material explicitly.

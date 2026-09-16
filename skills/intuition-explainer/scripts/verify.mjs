@@ -16,7 +16,7 @@ const root = args.length ? resolve(args[1]) : skill;
 const failures = [];
 async function walk(dir) {
   const entries = await readdir(dir, { withFileTypes: true });
-  return (await Promise.all(entries.filter(e => !['node_modules', '.git', 'evidence', 'test-results'].includes(e.name)).map(e => {
+  return (await Promise.all(entries.filter(e => !['node_modules', '.git', 'archive', 'evidence', 'test-results'].includes(e.name)).map(e => {
     const p = resolve(dir, e.name); return e.isDirectory() ? walk(p) : [p];
   }))).flat();
 }

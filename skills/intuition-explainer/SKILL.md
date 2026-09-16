@@ -5,8 +5,9 @@ description: >-
   direct manipulation, real computation, and transfer challenges. Use for explorable
   explanations, intuitive visualizations, concept playgrounds, interactive math
   demonstrations, visual algorithm explanations, research-paper explainers,
-  interactive textbooks, or 3Blue1Brown-like educational sites; for requests to
-  build intuition for an unfamiliar academic concept; and for editing these sites.
+  weekly lecture-note summaries, interactive textbooks, or educational sites;
+  for requests to build intuition for an unfamiliar academic concept; and for
+  editing these sites.
   Choose this when the requested deliverable is a learning environment, not for
   ordinary webpages, dashboards, static plots, or a text-only explanation.
 ---
@@ -58,6 +59,7 @@ on it. Read the following references when their phase or mode applies.
 | Phase | Read | Concrete output |
 |---|---|---|
 | Inspect source; plan learning | [concept-decomposition](references/concept-decomposition.md), [pedagogy](references/pedagogy.md) | Source/claim notes and concept plan |
+| Course notes or multiple lectures | [course-explainers](references/course-explainers.md) | Source inventory, weekly coverage, linked summaries and understanding checks |
 | A paper or paper section | [paper-explainers](references/paper-explainers.md) | Authors' reasoning chain, claim–experiment map, prerequisite detours |
 | Mathematics or a theorem | [math-explainers](references/math-explainers.md) | Construction, invariant, assumptions, formal bridge; proof boundary |
 | Design experiments | [interaction-patterns](references/interaction-patterns.md) | Prediction, manipulation, observable consequence, transfer |
@@ -72,12 +74,25 @@ separate explicit source claims, mathematical consequences, teaching analogies,
 and simplifications. If the source is inaccessible, identify the gap; do not
 invent its contents. Continue only work that does not depend on those contents.
 
-## Default architecture
+For a collection of sources, preserve the requested coverage. A course-wide
+request needs every supplied week represented, a navigable index, and explicit
+gaps for missing material. Give each learning unit its own target and experiment;
+do not silently reduce an entire course or paper to one convenient example.
+
+## Offline architecture
 
 Use semantic HTML, CSS, modern vanilla JavaScript, and SVG for geometric objects.
 Use Canvas when element counts or continuous drawing justify it. Keep the
-website lightweight; default to no build step and no runtime dependencies.
-Use an existing framework or another stack when the task gives a concrete reason.
+website usable by opening `index.html` directly through `file://`. Deliver local
+files with no server, build step, runtime package installation, or network
+dependency. Do not start a development or preview server.
+
+Use inline scripts or classic scripts loaded in dependency order with `defer`.
+Avoid browser ES module imports, runtime `fetch` of local files, remote fonts,
+CDNs, and service workers. Embed required data in the HTML/JavaScript or use
+local classic data scripts. Source links may point online, but the lesson must
+work without following them. If the user explicitly requests another stack,
+respect that request and explain any effect on offline use.
 
 ```text
 index.html
@@ -86,50 +101,35 @@ js/model.js          calculations; no DOM or animation clock
 js/lesson.js         stages, predictions, reveal/progression, learning state
 js/render.js         SVG/Canvas, labels, visual interpolation
 js/interactions.js   pointer/keyboard controls; dispatches learner intentions
-js/main.js           wiring and scheduling
+js/main.js           wiring and scheduling; classic deferred scripts
 tests/               independent model tests and browser scenarios
 CONCEPT-PLAN.md       internal authoring plan
 FIDELITY.md           auditable numerical and visual boundaries
 ```
 
-Adapt the structure when justified. Model values have one source of truth;
-renderers do not independently reimplement the algorithm. Keep lesson progress
+This is an example of responsibility boundaries, not a required file count.
+A small explanation can be one self-contained HTML file. A course can have an
+index and a folder per week, connected by relative links. Use scoped functions
+or IIFEs and a small shared namespace when separating classic scripts.
+
+Model values have one source of truth; renderers do not independently
+reimplement the algorithm. Keep lesson progress
 separate from transient animation position. A replay never applies the update
 twice. Changing inputs invalidates predictions tied to the old inputs.
-
-## Finished exemplar
-
-`assets/template/` is **Local Steps**, a complete gradient-descent lesson. Inspect
-its concept plan, pure model, tests, and running website before adapting it.
-It demonstrates a draggable point, committed predictions, real updates,
-overshoot, delayed equations, contour maps, and a rotated-valley transfer test.
-
-Copy it as a working starting point, not as a compulsory layout or subject:
-
-```bash
-cp -R <skill-dir>/assets/template my-explainer
-cd my-explainer
-python3 -m http.server 8000 --bind 127.0.0.1
-```
-
-Open `http://localhost:8000`. ES modules require HTTP; opening this exemplar
-with `file://` is not supported. Once served it needs no external services.
-For a different concept, replace the model, lesson, representations, source
-notes, tests, and fidelity ledger together. Do not reskin a gradient-descent
-lesson and leave its instructional assumptions intact.
 
 ## Verification contract
 
 1. Run a syntax check on **every** JavaScript file; `node --check js/*.js` checks
    only one. `scripts/verify.mjs --site <site-dir>` recursively checks the site.
-2. Run the site's independent model/lesson tests. For the exemplar, `npm test`
-   inside `assets/template` needs only Node 20+.
+2. Run the site's independent model/lesson tests, covering known results,
+   important invariants, and the intended counterexample.
 3. Run `scripts/smoke.mjs --site <site-dir> --out <evidence-dir>` from a directory
-   with Playwright installed. It serves the site on loopback, checks errors and
-   responsiveness, invokes `tests/browser-scenarios.mjs`, and saves screenshots
-   and a JSON report. The exemplar adapter exercises actual UI controls. Adapt
-   that scenario file to the new lesson; a generic load check cannot prove its
-   controls or stages work. See the script's `--help` for an existing URL/adapter.
+   with Playwright installed. It opens `index.html` through `file://` with network
+   access blocked, checks errors and responsiveness, invokes `tests/browser-scenarios.mjs`, and saves screenshots
+   and a JSON report. Write the scenario adapter for the actual lesson's controls
+   and expected results; a generic load check cannot prove its stages work.
+   For courses, exercise the index and every week's summary via relative links.
+   See the script's `--help` for adapter options.
 4. Exercise prediction/reveal, every stage and control, dragging, keyboard input,
    pause/resume, replay, reset, reversible history, input changes during playback,
    reduced motion, and transfer. Verify expected values, not just clickability.

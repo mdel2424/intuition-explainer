@@ -1,106 +1,152 @@
 # intuition-explainer
 
-A reusable Agent Skill for building websites that help people reason about
-difficult ideas. The learner predicts, changes something, observes a computed
-consequence, revises their explanation, and tries an unfamiliar case.
+A reusable Agent Skill for turning papers, lecture notes, and difficult concepts
+into interactive explanations. Learners predict, manipulate examples, observe
+computed consequences, and apply what they discover to a new case.
 
-The skill chooses a representation from the concept. Calculus can use linked
-number lines; linear algebra can use projections; an algorithm can use an
-editable graph; a paper can use a controlled comparison. An isometric world
-is one possible representation, not the organizing assumption.
+The source material and learning goal determine the representation: geometric
+constructions, editable graphs, linked plots, controlled comparisons, or whatever
+makes the idea easier to reason about.
 
-## What's included
-
-- [SKILL.md](skills/intuition-explainer/SKILL.md): triggers, principles, workflow,
-  reference routing, architecture, and verification requirements.
-- [Twelve focused references](skills/intuition-explainer/references/build-order.md):
-  pedagogy, decomposition, interactions, visual language, animation, mathematics,
-  papers, narration, fidelity, accessibility, build order, and QA.
-- [Local Steps](skills/intuition-explainer/assets/template/README.md): a complete
-  gradient-descent explainer with real calculations, seven stages, predictions,
-  direct manipulation, delayed equations, overshoot, contour maps, and transfer.
-- Independent model and lesson tests, a reusable Playwright harness, and a
-  domain-specific browser scenario adapter.
-- [Reference inspection](docs/reference-review.md) and [verification evidence](evidence/QA.md).
-
-```text
-skills/intuition-explainer/
-  SKILL.md
-  README.md
-  references/              detailed guidance, read when relevant
-  scripts/                 syntax/package checks and browser harness
-  assets/template/         finished Local Steps website, model, plan, tests
-docs/reference-review.md   inspected upstream revision and design decisions
-evidence/                  screenshots, browser report, pedagogical QA
-```
+The result is **offline HTML, CSS, and JavaScript**. Open `index.html` directly
+in a browser, with no server, build step, runtime installation, or internet
+connection needed to use the finished explanation.
 
 ## Install
 
-Copy the **whole** `skills/intuition-explainer` directory, including its assets
-and scripts. The skill uses only the shared `name` and `description` frontmatter
-fields and relative resource paths. No proprietary invocation metadata or
-agent-specific tool dependency is required. See the [Agent Skills specification](https://agentskills.io/specification).
+### Codex
 
-For a first personal installation, run either or both from this repository:
+In Codex, invoke the built-in `$skill-installer`:
+
+```text
+$skill-installer Install the intuition-explainer skill from https://github.com/mdel2424/intuition-explainer/tree/main/skills/intuition-explainer
+```
+
+The installer installs the whole skill directory and its supporting resources.
+Invoke `$intuition-explainer` on your next turn. If it does not appear, restart
+Codex. See the [official Codex installation guidance](https://learn.chatgpt.com/docs/build-skills#install-curated-skills-for-local-use).
+
+### Claude Code
+
+From a checkout of this repository:
 
 ```bash
-# Codex
-mkdir -p ~/.agents/skills
-cp -R skills/intuition-explainer ~/.agents/skills/
-
-# Claude Code
 mkdir -p ~/.claude/skills
 cp -R skills/intuition-explainer ~/.claude/skills/
 ```
 
-For project scope, use `.agents/skills/` for Codex or `.claude/skills/` for
-Claude Code in the target project. If the destination already contains this
-skill, review and replace/update that folder deliberately rather than nesting
-another copy inside it. Codex documents local discovery under `.agents/skills`;
-Claude Code documents `.claude/skills`. These paths were checked on 2026-09-15.
-[Codex installation conventions](https://learn.chatgpt.com/docs/build-skills),
-[Claude Code installation conventions](https://code.claude.com/docs/en/skills).
+For project scope, use `.claude/skills/` in the target project. Review an existing
+installation before replacing it and preserve the whole directory structure.
+See the [Claude Code skill documentation](https://code.claude.com/docs/en/skills).
 
-This task creates the distributable skill in this repository; it does not modify
-your personal agent configuration. If a newly installed skill is not listed,
-restart the agent session and explicitly invoke it.
+## Usage examples
 
-## Use
+Attach source files or give their paths, and describe the learner's background
+when it matters. In Claude Code, replace `$intuition-explainer` with
+`/intuition-explainer` in these prompts.
 
-In Codex:
+**Understand a research paper**
 
 ```text
-$intuition-explainer Build an interactive website that helps me discover why PCA works.
+$intuition-explainer Read the attached paper and build an interactive explanation
+that gives me a more intuitive look at the work done: what problem the authors
+address, why their approach makes sense, how it works, and what the experiments
+show. I know basic linear algebra. Link claims to the paper's sections and keep
+toy demonstrations distinct from the authors' reported results.
 ```
 
-In Claude Code:
+**Turn an entire course into weekly interactive summaries**
 
 ```text
-/intuition-explainer Turn section 3 of this paper into an interactive explanation.
+$intuition-explainer Use all the lecture notes in ./course-notes to make an
+interactive summary of every week. Create a course index, preserve the weekly
+order, link prerequisites across weeks, and give each week an experiment and
+a check for understanding. Cite the relevant lecture pages and flag missing
+weeks. Make the whole course usable offline.
 ```
 
-Attach or identify actual source material when the lesson depends on it. State
-the learner's background and constraints if known. The skill should also activate
-for appropriate natural-language requests to build intuitive learning websites;
-ordinary landing-page requests fall outside its scope.
+**Make a dense section or proof intuitive**
 
-## Preview the finished example
-
-From this repository:
-
-```bash
-python3 -m http.server 8000 --bind 127.0.0.1 --directory skills/intuition-explainer/assets/template
+```text
+$intuition-explainer Turn section 3 of the attached paper into a visual,
+interactive walkthrough. Help me discover why each assumption is needed,
+connect the construction to the notation, and show what breaks when an
+assumption is removed. Distinguish numerical evidence from a proof.
 ```
 
-Open `http://localhost:8000`. There is no build step, runtime library, CDN, font
-download, or backend. A static HTTP server is required for ES modules; `file://`
-is not supported. Copy the template to build a new lesson, then replace its
-concept plan, model, instructional arc, visualization, tests, and fidelity notes.
+**Build intuition for a concept**
+
+```text
+$intuition-explainer Help me understand conditional probability. Let me change
+the population and test accuracy, predict what a positive result means, and
+see why the base rate matters before introducing Bayes' rule.
+```
+
+**Compare two methods from supplied readings**
+
+```text
+$intuition-explainer Use these two papers to explain how their methods differ.
+Let me apply both to the same small example, vary the assumptions, and inspect
+where each succeeds or fails. Separate the computed comparison from published
+benchmark results, and cite both sources.
+```
+
+**Prepare for an exam from notes and problem sets**
+
+```text
+$intuition-explainer Use my lecture notes and problem sets to build an interactive
+revision guide. Organize it by the ideas needed to solve the problems, include
+prediction questions and hints, and finish each topic with an unfamiliar case.
+```
+
+**Explore an algorithm**
+
+```text
+$intuition-explainer Build an editable graph that helps me understand shortest
+paths. Let me predict a route, change an edge, and inspect the algorithm's real
+decisions, including ties and disconnected nodes.
+```
+
+Appropriate natural-language requests can also select the skill. It is intended
+for learning environments; ordinary landing pages and dashboards fall outside
+its scope.
+
+## What's included
+
+```text
+skills/intuition-explainer/
+  SKILL.md          teaching principles, source workflow, offline architecture
+  README.md         installation and invocation
+  references/       guidance for papers, courses, math, interaction, and QA
+  scripts/          syntax/link checks and offline browser verification
+tests/              regression checks for the verification tools
+docs/design.md      scope and architecture decisions
+evidence/QA.md      verification results and limits
+```
+
+Start with [SKILL.md](skills/intuition-explainer/SKILL.md). The references cover
+[papers](skills/intuition-explainer/references/paper-explainers.md),
+[course notes](skills/intuition-explainer/references/course-explainers.md),
+[mathematics](skills/intuition-explainer/references/math-explainers.md), and
+the [build workflow](skills/intuition-explainer/references/build-order.md).
+Each explanation is authored for its material and audience.
+
+## Offline architecture
+
+Use semantic HTML, local CSS, and plain JavaScript. A small explanation can fit
+in one HTML file; a larger one can use relative links and classic deferred
+scripts. Embed lesson data or load it through local classic scripts, so opening
+the files does not depend on `fetch`, module loading, a CDN, or a backend.
+
+For a course, deliver an `index.html` linking to the weekly explanations. Keep
+required assets in the folder so it can be copied or shared and opened offline.
+Source citations may link to the web; learning interactions must work without
+following those links.
 
 ## Verify
 
-Node 20+ is needed for verification. The generated website itself needs only a
-modern browser and a static server.
+The finished explanations need only a browser. Maintainers can install the
+development tools to check the skill and its verification harness (Node 20+):
 
 ```bash
 npm ci
@@ -108,29 +154,20 @@ npx playwright install chromium
 npm run verify
 ```
 
-`npm run check` checks skill frontmatter, local links, and every JavaScript file.
-`npm test` runs the independent model/lesson tests. `npm run smoke` serves the
-example on loopback, exercises the real UI at six viewport profiles, and writes
-screenshots plus `evidence/report.json`. Open the screenshots; the script cannot
-judge visual clarity or learning quality. [QA evidence and limits](evidence/QA.md)
-records the actual inspection.
+This checks syntax and local links, validates the browser harness against small
+test fixtures, and records screenshots. The fixtures test tooling; they are not
+lesson templates or evidence that a generated lesson teaches well.
+See [verification results and limits](evidence/QA.md).
 
-For a copied or different explainer:
+For a generated explanation, run from a directory with Playwright installed:
 
 ```bash
 node /path/to/intuition-explainer/scripts/verify.mjs --site ./my-explainer
 node /path/to/intuition-explainer/scripts/smoke.mjs --site ./my-explainer --out ./my-evidence
 ```
 
-Run from a directory with Playwright installed. Adapt the site's
-`tests/browser-scenarios.mjs` to its controls, expected calculations, and stages.
-An existing server can be tested with a URL and `--adapter`; use `--help` for
-details. Browser tooling is a development dependency, not a website dependency.
-
-## Architectural reference
-
-The requested [isometric-explainer](https://github.com/LaurentiuGabriel/learnscape/tree/main/skills/isometric-explainer)
-was inspected before implementation. This skill is independently authored and
-retains its emphasis on a real model, explicit fidelity, staged construction,
-a finished exemplar, automated verification, and visual inspection. It does
-not modify the reference or require its renderer, vehicles, or station system.
+The browser harness opens `index.html` through `file://`, blocks network access,
+and exercises six viewport profiles. Provide the site's
+`tests/browser-scenarios.mjs` with assertions for its actual controls, computed
+results, and learning sequence. Run independent model tests as appropriate and
+open the screenshots for visual review. See `smoke.mjs --help` for adapter options.
