@@ -22,6 +22,14 @@ The user's explicit scope, technology, visual approach, and level of detail
 take precedence over this skill's defaults. Make routine implementation choices
 and finish the authorized work; this workflow does not add approval gates.
 
+## Default theme
+
+Use a **3Blue1Brown-inspired dark theme**: black page and stage, near-black
+controls, white text, and deliberate blue, teal, and yellow mathematical accents.
+Apply the exact palette and usage rules in
+[visual-language](references/visual-language.md) across HTML, SVG, and Canvas.
+Keep this default unless the user requests another theme.
+
 ## Non-negotiable teaching principles
 
 1. **Plan the mental model before the UI.** State an observable learning target,

@@ -8,6 +8,10 @@ The source material and learning goal determine the representation: geometric
 constructions, editable graphs, linked plots, controlled comparisons, or whatever
 makes the idea easier to reason about.
 
+The default [visual theme](skills/intuition-explainer/references/visual-language.md)
+is inspired by 3Blue1Brown: black backgrounds, white text, and purposeful blue,
+teal, and yellow accents. Request another theme to override it.
+
 The result is **offline HTML, CSS, and JavaScript**. Open `index.html` directly
 in a browser, with no server, build step, runtime installation, or internet
 connection needed to use the finished explanation.

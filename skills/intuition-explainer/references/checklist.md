@@ -25,6 +25,9 @@ unresolved limitations. Do not mark unchecked items as passed.
 - [ ] Desktop/laptop, mobile, landscape, and zoom/reflow layouts remain readable.
 - [ ] Label collision and clipped equations are checked at extreme values.
 - [ ] Focus states, names, contrast, non-color cues, and non-hover access exist.
+- [ ] The default 3Blue1Brown-inspired palette (or the user's requested theme)
+      is consistent across pages, controls, equations, SVG, and Canvas; object
+      colors retain their meaning and actual foreground/background pairs pass contrast checks.
 - [ ] Model assumptions, illustrative quantities, and source claims are traceable.
 
 ## Browser workflow

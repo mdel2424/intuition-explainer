@@ -4,6 +4,10 @@ Turn papers, lecture notes, and concepts into interactive explanations that
 open directly in a browser and work offline. Choose the representation and
 learning sequence from the supplied material and the learner's needs.
 
+The default [visual theme](references/visual-language.md) is inspired by
+3Blue1Brown: black backgrounds, white text, and purposeful blue, teal, and yellow
+accents. An explicit theme request overrides this default.
+
 - [SKILL.md](SKILL.md) is the agent entry point and reference router.
 - [Build order](references/build-order.md) describes the authoring workflow.
 - [Paper explainers](references/paper-explainers.md) follows a paper's reasoning
