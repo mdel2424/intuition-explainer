@@ -215,7 +215,7 @@ Start with [SKILL.md](skills/intuition-explainer/SKILL.md). The references cover
 [papers](skills/intuition-explainer/references/paper-explainers.md),
 [course notes](skills/intuition-explainer/references/course-explainers.md),
 [mathematics](skills/intuition-explainer/references/math-explainers.md), and
-the [build workflow](skills/intuition-explainer/references/build-order.md).
+the [build workflow](skills/intuition-explainer/SKILL.md#workflow).
 Each explanation is authored for its material and audience.
 
 ## Offline architecture

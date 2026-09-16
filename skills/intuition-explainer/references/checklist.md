@@ -30,23 +30,29 @@ unresolved limitations. Do not mark unchecked items as passed.
       colors retain their meaning and actual foreground/background pairs pass contrast checks.
 - [ ] Model assumptions, illustrative quantities, and source claims are traceable.
 
-## Browser workflow
+## Verification workflow
 
-`scripts/verify.mjs` checks package links and syntax; `--site` checks a generated
-site. Independent model tests belong to the generated site. `scripts/smoke.mjs`
-provides Playwright setup, offline file loading, error collection, viewports, screenshots,
-and a JSON report. Domain-specific UI assertions live in the site's
-`tests/browser-scenarios.mjs`, so verification evolves with the lesson.
-
-Run from a project with Playwright installed. Use `--site <directory>` and
-provide `tests/browser-scenarios.mjs` or an explicit `--adapter <file.mjs>`.
-The harness blocks network requests and fails if the adapter is missing;
-it does not silently downgrade to “page loaded.” See `--help` for commands.
-
-Open the captured images. Inspect the first interaction, revealed counterexample,
-formal bridge, multiple representations, and transfer, including small screens.
-Check what the learner's eye will track, not just the absence of overflow.
-Automated bounds checks cannot establish readable labels or good teaching.
+1. Run `node <skill-dir>/scripts/verify.mjs --site <site-dir>` to check every
+   JavaScript file and local asset. `node --check js/*.js` checks only one file.
+   Run the site's independent model/lesson tests for known answers, invariants,
+   edge cases, input sensitivity, and the intended counterexample.
+2. From a directory with Playwright installed, run
+   `node <skill-dir>/scripts/smoke.mjs --site <site-dir> --out <evidence-dir>`.
+   Supply the site's `tests/browser-scenarios.mjs` exporting
+   `async exercise({ page, check, shot, profile })`, or pass `--adapter <file.mjs>`.
+   Exercise real controls and every stage; assert values, not just clickability.
+   The harness opens `file://`, blocks network access, checks errors and
+   responsiveness, and saves screenshots plus a JSON report. Missing adapters
+   fail; a generic load check cannot establish lesson correctness. Use `--help`
+   for options. Browser tooling is a development dependency only.
+3. **Open and inspect screenshots** of the first interaction, counterexample,
+   formal bridge, linked representations/generalization, and transfer at desktop
+   and mobile sizes. Check labels, equations, correspondence, hierarchy, and
+   zoom/reflow, including extreme inputs. Bounds checks cannot prove readability.
+4. Complete the technical checks and all 13 pedagogical questions. Revise model,
+   lesson, or layout failures; rerun affected checks and the full lesson after
+   shared-behavior changes. Record commands, results, inspected images, and
+   limitations. Missing tools leave checks unverified; complete independent work.
 
 ## Pedagogical review: answer explicitly with evidence
 

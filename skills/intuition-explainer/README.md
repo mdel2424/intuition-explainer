@@ -9,7 +9,7 @@ The default [visual theme](references/visual-language.md) is inspired by
 accents. An explicit theme request overrides this default.
 
 - [SKILL.md](SKILL.md) is the agent entry point and reference router.
-- [Build order](references/build-order.md) describes the authoring workflow.
+- The [workflow](SKILL.md#workflow) defines authoring phases and reference routing.
 - [Paper explainers](references/paper-explainers.md) follows a paper's reasoning
   and evidence; [course explainers](references/course-explainers.md) covers
   weekly summaries and connections across a full set of notes.
