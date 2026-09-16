@@ -1,0 +1,15 @@
+{
+  "name": "intuition-explainer-skill",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node skills/intuition-explainer/scripts/verify.mjs",
+    "test": "node --test skills/intuition-explainer/assets/template/tests/*.test.mjs",
+    "smoke": "node skills/intuition-explainer/scripts/smoke.mjs",
+    "verify": "npm run check && npm test && npm run smoke"
+  },
+  "devDependencies": {
+    "playwright": "1.58.2"
+  },
+  "engines": { "node": ">=20" }
+}

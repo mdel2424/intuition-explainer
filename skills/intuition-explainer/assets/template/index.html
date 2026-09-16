@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Discover gradient descent by moving a point, predicting a step, breaking the rule, and trying a new valley.">
+  <title>Local Steps — an experiment in finding a minimum</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <a class="skip-link" href="#lesson-title">Skip to the experiment</a>
+  <div class="site" id="app" data-stage="direction">
+    <header class="masthead">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">↘</span><h1>Local Steps</h1></div>
+      <p>An experiment in finding a minimum</p>
+      <a href="#about-model">About this model <span aria-hidden="true">↗</span></a>
+    </header>
+
+    <nav id="stage-nav" aria-label="Lesson stages"></nav>
+
+    <main>
+      <header class="lesson-header">
+        <p class="eyebrow" id="stage-label">01 / Find downhill</p>
+        <h2 id="lesson-title" tabindex="-1">Which way is down?</h2>
+        <p id="intro">Drag the blue point along the curve. Your task is to make its height smaller.</p>
+      </header>
+
+      <div class="workspace">
+        <section class="experiment" aria-label="Interactive experiment">
+          <div class="plot-heading"><span id="plot-name">One-dimensional bowl</span><span id="plot-mode">Drag to choose a start</span></div>
+          <svg id="plot" role="group" aria-labelledby="plot-title plot-description" viewBox="0 0 700 430">
+            <title id="plot-title">A point on a bowl-shaped curve</title>
+            <desc id="plot-description">Move the blue point by dragging or focus it and use arrow keys. The height is shown below the diagram.</desc>
+            <defs>
+              <marker id="arrow-step" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#087e78"/></marker>
+              <marker id="arrow-slope" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#9b5709"/></marker>
+              <clipPath id="plot-clip"><rect id="clip-rect"/></clipPath>
+            </defs>
+            <g id="grid"></g>
+            <g clip-path="url(#plot-clip)">
+              <g id="landscape"></g>
+              <path id="history-path" class="history-path"/>
+              <g id="history-dots"></g>
+              <line id="center-guide" class="center-guide"/>
+              <line id="slope-mark" class="slope-mark"/>
+              <line id="step-mark" class="step-mark" marker-end="url(#arrow-step)"/>
+              <circle id="next-point" class="next-point" r="5"/>
+            </g>
+            <g id="axis-labels"></g>
+            <g id="minimum-mark"><path d="M -5 -5 L 5 5 M -5 5 L 5 -5"/><text id="minimum-label" x="10" y="17">bottom</text></g>
+            <g id="point-handle" tabindex="0" role="button" aria-label="Move the blue point with arrow keys" aria-describedby="drag-help">
+              <circle class="point-target" r="23"/>
+              <circle class="point-focus" r="16"/>
+              <circle id="point" r="8"/>
+            </g>
+            <text id="point-label" class="point-label">your position</text>
+          </svg>
+          <div class="legend" aria-label="Diagram key">
+            <span class="position-key">● Position</span>
+            <span class="slope-key" id="slope-key" hidden>／ Local slope</span>
+            <span class="step-key" id="step-key" hidden>↗ Next step</span>
+          </div>
+          <div id="observation-controls"></div>
+          <div class="readouts" aria-label="Recorded model values">
+            <div><span id="position-label">Position</span><output id="position-value"></output></div>
+            <div><span>Height</span><output id="height-value"></output></div>
+            <div id="slope-readout" hidden><span id="slope-label">Local slope</span><output id="slope-value"></output></div>
+          </div>
+          <p class="micro" id="drag-help">Drag the point, or focus it and use ← →. Starting positions range from −4 to 4.</p>
+          <p class="micro" id="playback-note">Choose a position before predicting.</p>
+
+          <div class="parameter" id="eta-control" hidden>
+            <label for="eta">Step size <output id="eta-value" for="eta">0.20</output></label>
+            <input type="range" id="eta" min="0.05" max="2.4" step="0.01" value="0.2" aria-describedby="eta-help">
+            <p id="eta-help" class="micro">Changing this restarts the experiment from your chosen starting point.</p>
+          </div>
+
+          <section class="equation" id="equation" aria-label="The next-step equation" hidden>
+            <p class="eyebrow">The next step, from here</p>
+            <div class="symbolic" id="symbolic"></div>
+            <div class="numeric" id="numeric-equation">
+              <span id="eq-next"></span><span>=</span>
+              <button id="eq-position" data-highlight="position" aria-label="Highlight the current position"></button><span>−</span>
+              <button id="eq-eta" data-highlight="step" aria-label="Highlight the step size"></button><span>×</span>
+              <button id="eq-slope" data-highlight="slope" aria-label="Highlight the local slope"></button>
+            </div>
+            <p class="micro" id="formal-note"></p>
+          </section>
+        </section>
+
+        <aside class="lesson-actions" aria-label="Prediction and learner controls">
+          <p class="eyebrow" id="question-label">Make a prediction</p>
+          <h3 id="question"></h3>
+          <div id="choices" role="group" aria-labelledby="question"></div>
+          <button class="primary" id="reveal">Reveal one step <span aria-hidden="true">→</span></button>
+          <p class="micro" id="reveal-hint">Choose a prediction to reveal the result.</p>
+
+          <div class="result" id="result" aria-live="polite" aria-atomic="true" hidden>
+            <strong id="result-lead"></strong>
+            <p id="result-text"></p>
+          </div>
+          <p class="limit" id="limit" role="status" hidden></p>
+
+          <div class="playback" id="playback" hidden>
+            <div class="button-row">
+              <button id="pause">Pause</button>
+              <button id="replay">Replay</button>
+              <button id="run">Run 6 steps</button>
+            </div>
+            <label for="scrub">Recorded step <output id="step-value" for="scrub">0</output></label>
+            <input id="scrub" type="range" min="0" max="1" step="1" value="0">
+          </div>
+
+          <div id="reflection" hidden>
+            <label for="reason">Why can a move away from the bottom still go downhill?</label>
+            <textarea id="reason" rows="3" placeholder="Try explaining it in your own words."></textarea>
+            <details><summary>Compare your explanation</summary><p>The local slopes describe height changes here. A step can move away from the minimum in one coordinate while the combined change in both coordinates lowers the height. Local steepness is different from a straight route to the bottom.</p></details>
+          </div>
+
+          <div id="free-controls" hidden>
+            <label for="surface">Choose a surface</label>
+            <select id="surface"><option value="bowl">One-dimensional bowl</option><option value="valley">Narrow valley</option><option value="rotated">Rotated valley</option></select>
+            <p class="micro">These bowls each have one minimum. Real losses can have many valleys, noisy slopes, and millions of coordinates.</p>
+          </div>
+
+          <button class="quiet" id="reset">↺ Reset experiment</button>
+          <div class="lesson-navigation">
+            <button id="back" aria-label="Previous lesson stage">← Back</button>
+            <button id="next">Next idea →</button>
+          </div>
+        </aside>
+      </div>
+
+      <details class="about" id="about-model">
+        <summary>About this model <span>What is computed, and what is simplified?</span></summary>
+        <div class="about-copy">
+          <p><strong>Computed.</strong> Every height, local slope, update, contour, and prediction result comes from the current inputs. The plotted path is actual gradient descent. Displayed values are rounded; updates use full floating-point precision.</p>
+          <p><strong>Simplified.</strong> One- and two-dimensional convex quadratic functions, exact gradients, and a fixed step size. There is no training dataset, noise, momentum, adaptive optimizer, or claim about real model performance.</p>
+          <p><strong>Assumed.</strong> Starting positions, curvatures, step sizes, and Euclidean coordinates are teaching choices. A run stops past coordinate magnitude 10⁶ or 72 recorded steps for browser usability; that is a guard, not convergence.</p>
+          <p><strong>Illustrative.</strong> Animation speed and frames between recorded steps are visual aids, not extra optimizer steps. The amber uphill arrow on a map shows direction at a scaled length; the teal next-step arrow uses the calculated displacement. The view fits a revealed experiment and labels its axes. Curve axes can have different scales; the contour map uses equal scales.</p>
+          <details><summary>The exact functions and gradients</summary>
+            <p>Bowl: f(x) = x²/2, slope = x. Narrow valley: f(x,y) = (x² + 4y²)/2, gradient = (x, 4y).</p>
+            <p>Rotated valley: dx = x + 0.8, dy = y − 0.4, θ = π/5. Let u = cos θ · dx + sin θ · dy and v = −sin θ · dx + cos θ · dy. Then f = (0.6u² + 5v²)/2. The gradient is (0.6u cos θ − 5v sin θ, 0.6u sin θ + 5v cos θ), by the chain rule.</p>
+            <p>All updates subtract the step size times this gradient. This lesson teaches how to use a local slope, not how to derive derivatives.</p>
+          </details>
+        </div>
+      </details>
+    </main>
+    <footer><span>Predict. Try. Notice. Explain.</span><span>Local Steps · a small, computed world</span></footer>
+  </div>
+  <noscript>This experiment needs JavaScript to calculate and display each step. Enable it and reload.</noscript>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
