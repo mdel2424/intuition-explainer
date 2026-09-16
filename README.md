@@ -45,6 +45,28 @@ Attach source files or give their paths, and describe the learner's background
 when it matters. In Claude Code, replace `$intuition-explainer` with
 `/intuition-explainer` in these prompts.
 
+**Start with “teach me the intuition”**
+
+You can start with just a topic, a confusing passage, or some source files. You
+do not need to know which questions to ask or choose diagrams, controls, or an
+implementation. Let the skill work out a useful starting point and teaching
+approach from the material.
+
+```text
+$intuition-explainer Teach me the intuition behind the attached material.
+I don't know what I'm missing or what kind of explanation would help yet.
+Choose where to start, uncover any prerequisite gaps, and build an interactive
+explanation that helps me reason about the ideas. Leave the teaching format,
+visuals, interactions, and implementation choices to the skill.
+```
+
+For an even shorter request:
+
+```text
+$intuition-explainer I can follow the equations in these notes, but I don't
+understand what they mean. Help me build the intuition; you decide how.
+```
+
 **Understand a research paper**
 
 ```text
@@ -107,6 +129,67 @@ paths. Let me predict a route, change an edge, and inspect the algorithm's real
 decisions, including ties and disconnected nodes.
 ```
 
+### More examples for master's study
+
+**Fill prerequisite gaps while reading advanced material**
+
+```text
+$intuition-explainer I'm getting lost in this week's lecture notes. Use them
+to identify the prerequisite ideas I need, help me discover which ones I don't
+understand, and build short interactive explanations for those gaps. Bring me
+back to the original lecture once the missing ideas make sense.
+```
+
+**Connect ideas across courses**
+
+```text
+$intuition-explainer These notes from two of my courses seem related, but I
+can't explain the connection. Use the supplied material to help me understand
+what they have in common, how the notation maps across, and where the analogy
+breaks. Help me recognize when I can use an idea from one course in the other.
+```
+
+**Make sense of a thesis reading list**
+
+```text
+$intuition-explainer Use the papers in ./thesis-readings to build an interactive
+guide to this part of the literature. Help me understand the main research
+questions, the competing approaches, and how the papers build on or disagree
+with one another. Trace claims to the sources and distinguish the authors'
+contributions from your synthesis. I want to understand the landscape before
+choosing what to investigate further.
+```
+
+**Prepare for a journal club or research seminar**
+
+```text
+$intuition-explainer Help me understand this paper well enough to discuss it
+at my master's seminar. Build an interactive walkthrough of its central idea,
+the strongest evidence, and its limitations. Include questions that make me
+explain why the method should work, what the results establish, and what I
+would ask the authors. Let me try answering before showing an explanation.
+```
+
+**Reason about a thesis experiment**
+
+```text
+$intuition-explainer Here are my draft hypothesis and the relevant papers.
+Help me build intuition for what evidence would distinguish my explanation
+from plausible alternatives. Create an interactive exploration of assumptions,
+controls, confounds, and possible outcomes. Keep hypothetical outcomes clearly
+labeled and help me see what each would and would not establish.
+```
+
+**Turn feedback into targeted revision**
+
+```text
+$intuition-explainer Use my attempted solutions, the feedback, and the relevant
+lecture notes to help me understand where my reasoning went wrong. Build an
+interactive explanation of the underlying ideas, let me test my current mental
+model, and give me a new problem to check whether I can transfer what I learned.
+Focus on the reasoning rather than just correcting the final answers.
+```
+
 Appropriate natural-language requests can also select the skill. It is intended
 for learning environments; ordinary landing pages and dashboards fall outside
 its scope.
@@ -142,32 +225,3 @@ For a course, deliver an `index.html` linking to the weekly explanations. Keep
 required assets in the folder so it can be copied or shared and opened offline.
 Source citations may link to the web; learning interactions must work without
 following those links.
-
-## Verify
-
-The finished explanations need only a browser. Maintainers can install the
-development tools to check the skill and its verification harness (Node 20+):
-
-```bash
-npm ci
-npx playwright install chromium
-npm run verify
-```
-
-This checks syntax and local links, validates the browser harness against small
-test fixtures, and records screenshots. The fixtures test tooling; they are not
-lesson templates or evidence that a generated lesson teaches well.
-See [verification results and limits](evidence/QA.md).
-
-For a generated explanation, run from a directory with Playwright installed:
-
-```bash
-node /path/to/intuition-explainer/scripts/verify.mjs --site ./my-explainer
-node /path/to/intuition-explainer/scripts/smoke.mjs --site ./my-explainer --out ./my-evidence
-```
-
-The browser harness opens `index.html` through `file://`, blocks network access,
-and exercises six viewport profiles. Provide the site's
-`tests/browser-scenarios.mjs` with assertions for its actual controls, computed
-results, and learning sequence. Run independent model tests as appropriate and
-open the screenshots for visual review. See `smoke.mjs --help` for adapter options.
